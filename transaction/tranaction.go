@@ -2,8 +2,9 @@ package transaction
 
 import (
 	"crypto/sha256"
-	"encoding/binary"
-	"math/big"
+
+	ed25519 "filippo.io/edwards25519"
+	"github.com/auti-project/auti-core/commitment"
 )
 
 // Plain is the struct for plaintext transaction
@@ -25,30 +26,22 @@ type Hidden struct {
 }
 
 // Hide converts a plaintext transaction to a hidden transaction
-func (p *Plain) Hide(counter uint64, g, n *big.Int) *Hidden {
-	commitment := new(big.Int).Exp(g, big.NewInt(p.Amount), n)
+func (p *Plain) Hide(counter uint64, publicKey *ed25519.Point) (*Hidden, error) {
 	hashFunc := sha256.New()
 	hashFunc.Write([]byte(p.Sender))
 	senderHash := hashFunc.Sum(nil)
 	hashFunc.Reset()
 	hashFunc.Write([]byte(p.Receiver))
 	receiverHash := hashFunc.Sum(nil)
-	hashFunc.Reset()
-	timestampBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(timestampBytes, uint64(p.Timestamp))
-	counterBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(counterBytes, counter)
-	hashFunc.Write(timestampBytes)
-	hashFunc.Write(counterBytes)
-	tcHash := hashFunc.Sum(nil)
-	tcHashBigInt := new(big.Int).SetBytes(tcHash)
-	commitment.Mul(commitment, tcHashBigInt)
-	commitment.Mod(commitment, n)
+	c, err := commitment.Commit(p.Amount, p.Timestamp, counter, publicKey)
+	if err != nil {
+		return nil, err
+	}
 	return &Hidden{
 		Sender:     senderHash,
 		Receiver:   receiverHash,
-		Commitment: commitment.Bytes(),
+		Commitment: c,
 		Auxiliary:  p.Auxiliary,
 		Timestamp:  p.Timestamp,
-	}
+	}, nil
 }
