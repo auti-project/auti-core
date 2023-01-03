@@ -1,1 +1,1 @@
-# auti-core
+# AUTI Core
