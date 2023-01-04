@@ -3,6 +3,7 @@ package transaction
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"strconv"
 
 	ed25519 "filippo.io/edwards25519"
 	"github.com/auti-project/auti-core/commitment"
@@ -32,7 +33,7 @@ type OnChain struct {
 	Receiver   string `json:"Receiver"`
 	Commitment string `json:"Commit"`
 	Auxiliary  string `json:"Aux"`
-	Timestamp  int64  `json:"Timestamp"`
+	Timestamp  string `json:"Timestamp"`
 }
 
 // Hide converts a plaintext transaction to a hidden transaction
@@ -58,24 +59,31 @@ func (p *Plain) Hide(counter uint64, publicKey *ed25519.Point) (*Hidden, error) 
 
 // OnChain converts a hidden transaction to an on-chain transaction
 func (h *Hidden) OnChain() *OnChain {
+	// convert int64 timestamp to string
+	timestampStr := strconv.FormatInt(h.Timestamp, 10)
 	return &OnChain{
 		Sender:     string(h.Sender),
 		Receiver:   string(h.Receiver),
 		Commitment: string(h.Commitment),
 		Auxiliary:  string(h.Auxiliary),
-		Timestamp:  h.Timestamp,
+		Timestamp:  timestampStr,
 	}
 }
 
 // Hide converts an on-chain transaction to a hidden transaction
-func (o *OnChain) Hide() *Hidden {
+func (o *OnChain) Hide() (*Hidden, error) {
+	// convert string timestamp to int64
+	timestampInt, err := strconv.ParseInt(o.Timestamp, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	return &Hidden{
 		Sender:     []byte(o.Sender),
 		Receiver:   []byte(o.Receiver),
 		Commitment: []byte(o.Commitment),
 		Auxiliary:  []byte(o.Auxiliary),
-		Timestamp:  o.Timestamp,
-	}
+		Timestamp:  timestampInt,
+	}, nil
 }
 
 // KeyVal composes the key value pair for the transaction to be stored on-chain
