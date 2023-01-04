@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"strconv"
 
@@ -62,10 +63,10 @@ func (h *Hidden) OnChain() *OnChain {
 	// convert int64 timestamp to string
 	timestampStr := strconv.FormatInt(h.Timestamp, 10)
 	return &OnChain{
-		Sender:     string(h.Sender),
-		Receiver:   string(h.Receiver),
-		Commitment: string(h.Commitment),
-		Auxiliary:  string(h.Auxiliary),
+		Sender:     hex.EncodeToString(h.Sender),
+		Receiver:   hex.EncodeToString(h.Receiver),
+		Commitment: hex.EncodeToString(h.Commitment),
+		Auxiliary:  hex.EncodeToString(h.Auxiliary),
 		Timestamp:  timestampStr,
 	}
 }
@@ -94,5 +95,5 @@ func (o *OnChain) KeyVal() (string, []byte, error) {
 		return "", nil, err
 	}
 	sha256Hash.Write(txJSON)
-	return string(sha256Hash.Sum(nil)), txJSON, nil
+	return hex.EncodeToString(sha256Hash.Sum(nil)), txJSON, nil
 }
