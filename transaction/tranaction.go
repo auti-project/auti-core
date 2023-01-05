@@ -78,13 +78,25 @@ func (o *OnChain) Hide() (*Hidden, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Hidden{
-		Sender:     []byte(o.Sender),
-		Receiver:   []byte(o.Receiver),
-		Commitment: []byte(o.Commitment),
-		Auxiliary:  []byte(o.Auxiliary),
-		Timestamp:  timestampInt,
-	}, nil
+	var hiddenTX *Hidden
+	hiddenTX.Sender, err = hex.DecodeString(o.Sender)
+	if err != nil {
+		return nil, err
+	}
+	hiddenTX.Receiver, err = hex.DecodeString(o.Receiver)
+	if err != nil {
+		return nil, err
+	}
+	hiddenTX.Commitment, err = hex.DecodeString(o.Commitment)
+	if err != nil {
+		return nil, err
+	}
+	hiddenTX.Auxiliary, err = hex.DecodeString(o.Auxiliary)
+	if err != nil {
+		return nil, err
+	}
+	hiddenTX.Timestamp = timestampInt
+	return hiddenTX, nil
 }
 
 // KeyVal composes the key value pair for the transaction to be stored on-chain
