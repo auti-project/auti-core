@@ -37,6 +37,7 @@ func (t *Tree) init(txList []*transaction.Hidden) {
 	for i := 0; i < txLen; i++ {
 		t.nodes[0][i] = txList[i].Commitment
 		t.leafMap[hex.EncodeToString(txList[i].Commitment)] = i
+
 	}
 	// make the slices for other levels
 	nodeLen := txLen
@@ -56,24 +57,22 @@ func calHeight(txLen int) int {
 }
 
 func (t *Tree) compute() error {
-	addPoint, leftPoint, rightPoint := new(ed25519.Point), new(ed25519.Point), new(ed25519.Point)
+	points := make([]*ed25519.Point, len(t.nodes[0]))
+	for i := 0; i < len(t.nodes[0]); i++ {
+		points[i] = new(ed25519.Point)
+		if _, err := points[i].SetBytes(t.nodes[0][i]); err != nil {
+			return err
+		}
+	}
+	gap := 1
 	for i := 1; i < t.height; i++ {
 		for j := 0; j < len(t.nodes[i]); j++ {
-			if j<<1+1 < len(t.nodes[i-1]) {
-				_, err := leftPoint.SetBytes(t.nodes[i-1][j<<1])
-				if err != nil {
-					return err
-				}
-				_, err = rightPoint.SetBytes(t.nodes[i-1][j<<1+1])
-				if err != nil {
-					return err
-				}
-				addPoint.Add(leftPoint, rightPoint)
-				t.nodes[i][j] = addPoint.Bytes()
-			} else {
-				t.nodes[i][j] = t.nodes[i-1][j<<1]
+			if j<<i+gap < len(points) {
+				points[j<<i].Add(points[j<<i], points[j<<i+gap])
 			}
+			t.nodes[i][j] = points[j<<i].Bytes()
 		}
+		gap <<= 1
 	}
 	t.Root = t.nodes[t.height-1][0]
 	return nil

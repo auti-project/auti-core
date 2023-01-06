@@ -80,14 +80,36 @@ func TestNew(t *testing.T) {
 			args: args{
 				txList: getDummyHiddenTxList(1),
 			},
-			wantErr: false,
+		},
+		{
+			name: "TestNew_2",
+			args: args{
+				txList: getDummyHiddenTxList(2),
+			},
+		},
+		{
+			name: "TestNew_3",
+			args: args{
+				txList: getDummyHiddenTxList(3),
+			},
+		},
+		{
+			name: "TestNew_4",
+			args: args{
+				txList: getDummyHiddenTxList(4),
+			},
+		},
+		{
+			name: "TestNew_8",
+			args: args{
+				txList: getDummyHiddenTxList(8),
+			},
 		},
 		{
 			name: "TestNew_1000",
 			args: args{
 				txList: getDummyHiddenTxList(1000),
 			},
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -101,5 +123,14 @@ func TestNew(t *testing.T) {
 				t.Errorf("New() got.Root = %v, want %v", got.Root, commitmentSum(tt.args.txList))
 			}
 		})
+	}
+}
+
+func BenchmarkNew(b *testing.B) {
+	txList := getDummyHiddenTxList(1000)
+	for i := 0; i < b.N; i++ {
+		if _, err := New(txList); err != nil {
+			b.Errorf("New() error = %v", err)
+		}
 	}
 }
