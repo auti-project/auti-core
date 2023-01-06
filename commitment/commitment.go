@@ -9,7 +9,7 @@ import (
 
 // Commit generates a commitment from amount, timestamp, counter and the public key (ED25519 point)
 // Commitment = r * G * amount_scalar * Hash(timestamp || counter)
-func Commit(amount, timestamp int64, counter uint64, publicKey *ed25519.Point) ([]byte, error) {
+func Commit(amount, timestamp int64, counter uint64, g, h *ed25519.Point) ([]byte, error) {
 	amountBytes := make([]byte, 64)
 	binary.BigEndian.PutUint64(amountBytes, uint64(amount))
 	amountScalar := ed25519.NewScalar()
@@ -20,7 +20,7 @@ func Commit(amount, timestamp int64, counter uint64, publicKey *ed25519.Point) (
 	timestampBytes := make([]byte, 64)
 	binary.BigEndian.PutUint64(timestampBytes, uint64(timestamp))
 	counterBytes := make([]byte, 64)
-	binary.BigEndian.PutUint64(counterBytes, uint64(counter))
+	binary.BigEndian.PutUint64(counterBytes, counter)
 	hashFunc := sha256.New()
 	hashFunc.Write(timestampBytes)
 	hashFunc.Write(counterBytes)
@@ -32,8 +32,10 @@ func Commit(amount, timestamp int64, counter uint64, publicKey *ed25519.Point) (
 	if err != nil {
 		return nil, err
 	}
-	commitment := ed25519.NewIdentityPoint().Set(publicKey)
-	commitment.ScalarMult(hashScalar, commitment)
+	commitment := ed25519.NewIdentityPoint().Set(g)
 	commitment.ScalarMult(amountScalar, commitment)
+	tmp := ed25519.NewIdentityPoint().Set(h)
+	tmp.ScalarMult(hashScalar, tmp)
+	commitment.Add(commitment, tmp)
 	return commitment.Bytes(), nil
 }

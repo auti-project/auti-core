@@ -38,14 +38,14 @@ type OnChain struct {
 }
 
 // Hide converts a plaintext transaction to a hidden transaction
-func (p *Plain) Hide(counter uint64, publicKey *ed25519.Point) (*Hidden, error) {
+func (p *Plain) Hide(counter uint64, g, h *ed25519.Point) (*Hidden, error) {
 	hashFunc := sha256.New()
 	hashFunc.Write([]byte(p.Sender))
 	senderHash := hashFunc.Sum(nil)
 	hashFunc.Reset()
 	hashFunc.Write([]byte(p.Receiver))
 	receiverHash := hashFunc.Sum(nil)
-	c, err := commitment.Commit(p.Amount, p.Timestamp, counter, publicKey)
+	c, err := commitment.Commit(p.Amount, p.Timestamp, counter, g, h)
 	if err != nil {
 		return nil, err
 	}

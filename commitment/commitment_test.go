@@ -13,8 +13,9 @@ func TestCommit(t *testing.T) {
 	type args struct {
 		amount    int64
 		timestamp int64
-		counter   uint16
-		publicKey *ed25519.Point
+		counter   uint64
+		g         *ed25519.Point
+		h         *ed25519.Point
 	}
 	tests := []struct {
 		name    string
@@ -28,7 +29,8 @@ func TestCommit(t *testing.T) {
 				amount:    100,
 				timestamp: 100,
 				counter:   100,
-				publicKey: ed25519.NewIdentityPoint(),
+				g:         ed25519.NewIdentityPoint(),
+				h:         ed25519.NewIdentityPoint(),
 			},
 			want:    wantBytes,
 			wantErr: false,
@@ -36,7 +38,7 @@ func TestCommit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Commit(tt.args.amount, tt.args.timestamp, tt.args.counter, tt.args.publicKey)
+			got, err := Commit(tt.args.amount, tt.args.timestamp, tt.args.counter, tt.args.g, tt.args.h)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Commit() error = %v, wantErr %v", err, tt.wantErr)
 				return
