@@ -1,4 +1,4 @@
-package digest
+package auditing
 
 import (
 	"crypto/rand"
@@ -7,8 +7,8 @@ import (
 	ed25519 "filippo.io/edwards25519"
 )
 
-// DummyDigest generates a dummy digest for a given organization ID
-func DummyDigest(orgID string) (*Digest, error) {
+// DummyRecord creates a dummy record
+func DummyRecord(orgID string) (*Record, error) {
 	point := ed25519.NewGeneratorPoint()
 	randBytes := make([]byte, 64)
 	_, err := rand.Read(randBytes)
@@ -21,21 +21,22 @@ func DummyDigest(orgID string) (*Digest, error) {
 		return nil, err
 	}
 	point.ScalarMult(scalar, point)
-	return &Digest{
-		Data:  hex.EncodeToString(point.Bytes()),
-		OrgID: orgID,
+	return &Record{
+		Payload: hex.EncodeToString(point.Bytes()),
+		Type:    0,
+		OrgID:   orgID,
 	}, nil
 }
 
-// DummyDigests generates a list of dummy digests for a given organization ID
-func DummyDigests(orgID string, count int) ([]*Digest, error) {
-	digests := make([]*Digest, count)
+// DummyRecords creates a slice of dummy records
+func DummyRecords(orgID string, count int) ([]*Record, error) {
+	records := make([]*Record, count)
 	for i := 0; i < count; i++ {
-		digest, err := DummyDigest(orgID)
+		record, err := DummyRecord(orgID)
 		if err != nil {
 			return nil, err
 		}
-		digests[i] = digest
+		records[i] = record
 	}
-	return digests, nil
+	return records, nil
 }
