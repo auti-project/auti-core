@@ -78,7 +78,7 @@ func (o *OnChain) Hide() (*Hidden, error) {
 	if err != nil {
 		return nil, err
 	}
-	var hiddenTX *Hidden
+	hiddenTX := new(Hidden)
 	hiddenTX.Sender, err = hex.DecodeString(o.Sender)
 	if err != nil {
 		return nil, err
