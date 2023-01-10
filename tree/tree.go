@@ -37,7 +37,6 @@ func (t *Tree) init(txList []*transaction.Hidden) {
 	for i := 0; i < txLen; i++ {
 		t.nodes[0][i] = txList[i].Commitment
 		t.leafMap[hex.EncodeToString(txList[i].Commitment)] = i
-
 	}
 	// make the slices for other levels
 	nodeLen := txLen

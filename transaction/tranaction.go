@@ -71,6 +71,11 @@ func (h *Hidden) OnChain() *OnChain {
 	}
 }
 
+// Serialize returns the hidden transaction's commitment, for Merkle Tree generation purpose
+func (h *Hidden) Serialize() ([]byte, error) {
+	return h.Commitment, nil
+}
+
 // Hide converts an on-chain transaction to a hidden transaction
 func (o *OnChain) Hide() (*Hidden, error) {
 	// convert string timestamp to int64
