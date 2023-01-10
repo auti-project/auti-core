@@ -2,9 +2,12 @@ package tree
 
 import (
 	"bytes"
+	"math/rand"
 	"testing"
+	"time"
 
-	ed25519 "filippo.io/edwards25519"
+	"filippo.io/edwards25519"
+	"github.com/auti-project/auti-core/ed25519"
 	"github.com/auti-project/auti-core/transaction"
 )
 
@@ -35,11 +38,36 @@ func Test_calHeight(t *testing.T) {
 }
 
 func getDummyHiddenTxList(size int) []*transaction.Hidden {
-	g, _ := transaction.DummyGetKeyPairs()
-	h, _ := transaction.DummyGetKeyPairs()
-	txList, err := transaction.DummyTXs(size)
+	// g, _ := transaction.DummyGetKeyPairs()
+	// h, _ := transaction.DummyGetKeyPairs()
+	g, _, err := ed25519.KeyGen()
 	if err != nil {
 		panic(err)
+	}
+	h, _, err := ed25519.KeyGen()
+	if err != nil {
+		panic(err)
+	}
+	txList := make([]*transaction.Plain, size)
+	randBytes := make([]byte, 32)
+	for i := 0; i < size; i++ {
+		_, err := rand.Read(randBytes)
+		if err != nil {
+			panic(err)
+		}
+		sender := string(randBytes)
+		_, err = rand.Read(randBytes)
+		if err != nil {
+			panic(err)
+		}
+		receiver := string(randBytes)
+		amount := rand.Int63()
+		txList[i] = &transaction.Plain{
+			Sender:    sender,
+			Receiver:  receiver,
+			Amount:    amount,
+			Timestamp: time.Now().Unix(),
+		}
 	}
 	hiddenTxList := make([]*transaction.Hidden, size)
 	for i := 0; i < size; i++ {
@@ -52,12 +80,12 @@ func getDummyHiddenTxList(size int) []*transaction.Hidden {
 }
 
 func commitmentSum(txList []*transaction.Hidden) []byte {
-	point, err := new(ed25519.Point).SetBytes(txList[0].Commitment)
+	point, err := new(edwards25519.Point).SetBytes(txList[0].Commitment)
 	if err != nil {
 		panic(err)
 	}
 	for i := 1; i < len(txList); i++ {
-		newPoint, err := new(ed25519.Point).SetBytes(txList[i].Commitment)
+		newPoint, err := new(edwards25519.Point).SetBytes(txList[i].Commitment)
 		if err != nil {
 			panic(err)
 		}
