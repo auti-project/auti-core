@@ -15,13 +15,9 @@ type Record struct {
 
 // NewRecord creates a new cross-chain record
 func NewRecord(commitment, proof, root []byte) (*Record, error) {
-	proofBytes, err := json.Marshal(proof)
-	if err != nil {
-		return nil, err
-	}
 	return &Record{
 		Commitment:  hex.EncodeToString(commitment),
-		MerkleProof: hex.EncodeToString(proofBytes),
+		MerkleProof: hex.EncodeToString(proof),
 		MerkleRoot:  hex.EncodeToString(root),
 	}, nil
 }
