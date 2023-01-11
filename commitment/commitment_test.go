@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	ed25519 "filippo.io/edwards25519"
 )
@@ -40,9 +41,9 @@ func TestCommit(t *testing.T) {
 		{
 			name: "Test_Commitment_Negative",
 			args: args{
-				amount:    100,
-				timestamp: 100,
-				counter:   100,
+				amount:    3456345,
+				timestamp: time.Now().UnixNano(),
+				counter:   1234234,
 				g:         g,
 				h:         h,
 			},
@@ -85,13 +86,13 @@ func paramSetup() (g, h *ed25519.Point) {
 	randScalar := ed25519.NewScalar()
 	_, err = randScalar.SetUniformBytes(randBytes)
 	handleErr(err)
-	g = ed25519.NewIdentityPoint()
+	g = ed25519.NewGeneratorPoint()
 	g.ScalarMult(randScalar, g)
 	_, err = rand.Read(randBytes)
 	handleErr(err)
 	_, err = randScalar.SetUniformBytes(randBytes)
 	handleErr(err)
-	h = ed25519.NewIdentityPoint()
+	h = ed25519.NewGeneratorPoint()
 	h.ScalarMult(randScalar, h)
 	return
 }
