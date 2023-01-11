@@ -28,46 +28,6 @@ func NewPlain(sender, receiver string, amount int64) *Plain {
 	}
 }
 
-// Hidden is the struct for hidden transaction
-type Hidden struct {
-	Sender     []byte
-	Receiver   []byte
-	Commitment []byte
-	Auxiliary  []byte
-	Timestamp  int64
-}
-
-// NewHidden creates a new hidden transaction
-func NewHidden(sender, receiver, commitment, auxiliary []byte, timestamp int64) *Hidden {
-	return &Hidden{
-		Sender:     sender,
-		Receiver:   receiver,
-		Commitment: commitment,
-		Auxiliary:  auxiliary,
-		Timestamp:  timestamp,
-	}
-}
-
-// OnChain is the struct for on-chain transaction
-type OnChain struct {
-	Sender     string `json:"Sender"`
-	Receiver   string `json:"Receiver"`
-	Commitment string `json:"Commit"`
-	Auxiliary  string `json:"Aux"`
-	Timestamp  string `json:"Timestamp"`
-}
-
-// NewOnChain creates a new on-chain transaction
-func NewOnChain(sender, receiver, commitment, auxiliary, timestamp string) *OnChain {
-	return &OnChain{
-		Sender:     sender,
-		Receiver:   receiver,
-		Commitment: commitment,
-		Auxiliary:  auxiliary,
-		Timestamp:  timestamp,
-	}
-}
-
 // Hide converts a plaintext transaction to a hidden transaction
 func (p *Plain) Hide(counter uint64, g, h *ed25519.Point) (*Hidden, error) {
 	hashFunc := sha256.New()
@@ -89,6 +49,26 @@ func (p *Plain) Hide(counter uint64, g, h *ed25519.Point) (*Hidden, error) {
 	}, nil
 }
 
+// Hidden is the struct for hidden transaction
+type Hidden struct {
+	Sender     []byte
+	Receiver   []byte
+	Commitment []byte
+	Auxiliary  []byte
+	Timestamp  int64
+}
+
+// NewHidden creates a new hidden transaction
+func NewHidden(sender, receiver, commitment, auxiliary []byte, timestamp int64) *Hidden {
+	return &Hidden{
+		Sender:     sender,
+		Receiver:   receiver,
+		Commitment: commitment,
+		Auxiliary:  auxiliary,
+		Timestamp:  timestamp,
+	}
+}
+
 // OnChain converts a hidden transaction to an on-chain transaction
 func (h *Hidden) OnChain() *OnChain {
 	// convert int64 timestamp to string
@@ -105,6 +85,26 @@ func (h *Hidden) OnChain() *OnChain {
 // Serialize returns the hidden transaction's commitment, for Merkle Tree generation purpose
 func (h *Hidden) Serialize() ([]byte, error) {
 	return h.Commitment, nil
+}
+
+// OnChain is the struct for on-chain transaction
+type OnChain struct {
+	Sender     string `json:"Sender"`
+	Receiver   string `json:"Receiver"`
+	Commitment string `json:"Commit"`
+	Auxiliary  string `json:"Aux"`
+	Timestamp  string `json:"Timestamp"`
+}
+
+// NewOnChain creates a new on-chain transaction
+func NewOnChain(sender, receiver, commitment, auxiliary, timestamp string) *OnChain {
+	return &OnChain{
+		Sender:     sender,
+		Receiver:   receiver,
+		Commitment: commitment,
+		Auxiliary:  auxiliary,
+		Timestamp:  timestamp,
+	}
 }
 
 // Hide converts an on-chain transaction to a hidden transaction
