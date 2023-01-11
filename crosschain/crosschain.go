@@ -4,8 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-
-	mt "github.com/txaty/go-merkletree"
 )
 
 // Record is the cross-chain record on chain
@@ -16,7 +14,7 @@ type Record struct {
 }
 
 // NewRecord creates a new cross-chain record
-func NewRecord(commitment, root []byte, proof *mt.Proof) (*Record, error) {
+func NewRecord(commitment, proof, root []byte) (*Record, error) {
 	proofBytes, err := json.Marshal(proof)
 	if err != nil {
 		return nil, err
@@ -37,4 +35,18 @@ func (r *Record) KeyVal() (string, []byte, error) {
 	sha256Hash := sha256.New()
 	sha256Hash.Write(jsonBytes)
 	return hex.EncodeToString(sha256Hash.Sum(nil)), jsonBytes, nil
+}
+
+// Reveal reveals the data recorded
+func (r *Record) Reveal() (commit, proof, root []byte, err error) {
+	commit, err = hex.DecodeString(r.Commitment)
+	if err != nil {
+		return
+	}
+	proof, err = hex.DecodeString(r.MerkleProof)
+	if err != nil {
+		return
+	}
+	root, err = hex.DecodeString(r.MerkleRoot)
+	return
 }
