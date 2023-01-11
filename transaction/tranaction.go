@@ -61,7 +61,7 @@ func (p *Plain) HidePair(counter uint64, g, h *ed25519.Point) (h1, h2 *Hidden, e
 	if c1, err = commitment.Commit(p.Amount, p.Timestamp, counter, g, h, false); err != nil {
 		return
 	}
-	if c2, err = commitment.Commit(p.Amount, p.Timestamp, counter, g, h, true); err != nil {
+	if c2, err = commitment.Commit(-p.Amount, p.Timestamp, counter, g, h, true); err != nil {
 		return
 	}
 	h1 = &Hidden{
